@@ -9,7 +9,7 @@ dotenv.config();
 
 const app: Express = express();
 app.use(express.json());
-app.use(cors({origin: "http://localhost:3001"}));
+app.use(cors({origin: "http://localhost:5173"}));
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Blog APO is running')
