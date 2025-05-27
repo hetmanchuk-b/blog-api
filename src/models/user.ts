@@ -28,7 +28,7 @@ export const createUserDB = async (user: Omit<User, 'id' | 'created_at' | 'login
 }
 
 export const updateUserRoleDB = async (id: number, role: 'admin' | 'user'): Promise<User | null> => {
-  const result = await pool.query('UPDATE users SET role = $1 WHERE id = $2 RETURNING *', [id, role]);
+  const result = await pool.query('UPDATE users SET role = $1 WHERE id = $2 RETURNING *', [role, id]);
   return result.rows[0] || null;
 }
 

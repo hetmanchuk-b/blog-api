@@ -9,11 +9,11 @@ export const getCommentsByPostDB = async (post_id: number): Promise<Comment[]> =
   return result.rows;
 }
 
-export const createCommentDB = async (comment: Omit<Comment, 'id' | 'created_at'>): Promise<Comment> => {
-  const {content, post_id, author} = comment;
+export const createCommentDB = async (comment: Omit<Comment, 'id' | 'created_at'> & {user_id?: number}): Promise<Comment> => {
+  const {content, post_id, author, user_id} = comment;
   const result = await pool.query(
-    'INSERT INTO comments (content, post_id, author) VALUES ($1, $2, $3) RETURNING *',
-    [content, post_id, author]
+    'INSERT INTO comments (content, post_id, author, user_id) VALUES ($1, $2, $3, $4) RETURNING *',
+    [content, post_id, author, user_id || null]
   );
   return result.rows[0];
 }

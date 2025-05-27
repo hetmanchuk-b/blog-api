@@ -3,6 +3,10 @@ import {Comment} from "../types/comment";
 import {getCommentsByPostDB, createCommentDB, deleteCommentDB} from "../models/comment";
 import {getPostByIdDB} from "../models/post";
 
+interface AuthRequest extends Request {
+  user?: {id: number; username: string; email: string; role: 'admin' | 'user'};
+}
+
 export const getCommentsByPost = async (req: Request, res: Response<Comment[] | Record<string, any>>) => {
   try {
     const post_id = Number(req.params.post_id);
@@ -16,16 +20,13 @@ export const getCommentsByPost = async (req: Request, res: Response<Comment[] | 
   }
 }
 
-export const createComment = async (req: Request, res: Response<Comment | Record<string, any>>) => {
-  const {content, post_id, author} = req.body;
+export const createComment = async (req: AuthRequest, res: Response<Comment | Record<string, any>>) => {
+  const {content, post_id} = req.body;
   if (!content) {
     res.status(400).json({ error: 'Missing content' });
   }
   if (!post_id) {
     res.status(400).json({ error: 'Missing post ID' });
-  }
-  if (!author) {
-    res.status(400).json({ error: 'Missing author' });
   }
 
   const post = await getPostByIdDB(Number(post_id));
@@ -34,7 +35,15 @@ export const createComment = async (req: Request, res: Response<Comment | Record
   }
 
   try {
-    const comment = await createCommentDB({content, post_id, author});
+    const commentData: any = {
+      content,
+      post_id,
+      author: req.user ? req.user.username : 'Guest',
+    }
+    if (req.user) {
+      commentData.user_id = req.user.id;
+    }
+    const comment = await createCommentDB(commentData);
     res.status(201).json(comment);
   } catch (err: any) {
     res.status(500).json({error: err.message});

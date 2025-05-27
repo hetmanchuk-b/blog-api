@@ -1,7 +1,7 @@
 import pool from '../config/db'
 import {PasswordReset} from "../types/password-reset";
 
-export const createResetTokenDB = async (user_id: string, token: string, expires_at: Date): Promise<PasswordReset> => {
+export const createResetTokenDB = async (user_id: number, token: string, expires_at: Date): Promise<PasswordReset> => {
   const result = await pool.query(
     'INSERT INTO password_resets (user_id, token, expires_at) VALUES ($1, $2, $3) RETURNING *',
     [user_id, token, expires_at]

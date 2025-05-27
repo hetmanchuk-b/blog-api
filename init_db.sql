@@ -51,3 +51,4 @@ VALUES ('Excellent post!', 1, 'Guest'), ('Your art is great!', 1, 'Guest');
 
 INSERT INTO users (username, email, password, role)
 VALUES ('admin', 'admin@example.com', '$2b$10$examplehashedpassword', 'admin');
+
