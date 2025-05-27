@@ -10,6 +10,7 @@ import {
   updatePasswordDB
 } from "../models/user";
 import {createResetTokenDB, deleteResetTokenDB, findResetTokenDB} from "../models/password-reset";
+import {sendEmail} from "../services/email-service";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const MAX_LOGIN_ATTEMPTS = 20;
@@ -88,8 +89,23 @@ export const forgotPassword = async (req: Request, res: Response) => {
     const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await createResetTokenDB(user.id!, token, expires_at);
 
-    // TODO: sending email with token (now returning token for test purposes)
-    res.json({message: 'Password reset token generated', token});
+    const resetLink = `${process.env.APP_URL}/reset-password?token=${token}`;
+    const emailContent = `
+      <h1>Password Reset</h1>
+      <p>You requested password reset for account ${user.username}</p>
+      <p>Follow the link to set a new password</p>
+      <a href="${resetLink}">${resetLink}</a>
+      <p>Link is available for 24 hours.</p>
+      <p>If you did not request a reset, please ignore this email.</p>
+    `;
+
+    await sendEmail({
+      to: email,
+      subject: 'Password Reset for Blog Website',
+      html: emailContent
+    });
+
+    res.json({message: 'Password reset token generated'});
   } catch (err: any) {
     res.status(500).json({error: err.message});
   }
