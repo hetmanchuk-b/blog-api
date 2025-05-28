@@ -9,7 +9,7 @@ interface AuthRequest extends Request {
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.get('authorization');
+  const authHeader = req.get('Authorization');
   const token = authHeader?.split(' ')[1];
   if (!token) {
     return res.status(401).json({error: 'No token provided'});
@@ -32,7 +32,7 @@ export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction) => 
 }
 
 export const isAuthenticatedOrGuest = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.get('authorization');
+  const authHeader = req.get('Authorization');
   const token = authHeader?.split(' ')[1];
   if (token) {
     try {

@@ -1,5 +1,5 @@
 import express, {Router} from 'express'
-import {register, login, forgotPassword, resetPassword, verifyToken, verifyResetToken} from "../controllers/auth";
+import {register, login, forgotPassword, resetPassword, verifyToken} from "../controllers/auth";
 import {loginRateLimit} from "../middleware/rate-limit";
 import {authenticate} from "../middleware/auth";
 

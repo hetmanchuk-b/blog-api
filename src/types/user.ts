@@ -7,4 +7,5 @@ export interface User {
   created_at: Date;
   login_attempts?: number;
   locked_until?: Date | null;
+  bio: string | null;
 }

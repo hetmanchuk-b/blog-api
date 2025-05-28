@@ -3,17 +3,17 @@ import {User} from "../types/user";
 import bcrypt from 'bcrypt';
 
 export const findUserByEmailDB = async (email: string): Promise<User | null> => {
-  const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+  const result = await pool.query('SELECT id, username, email, password, role, bio FROM users WHERE email = $1', [email]);
   return result.rows[0] || null;
 }
 
 export const findUserByUsernameDB = async (username: string): Promise<User | null> => {
-  const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+  const result = await pool.query('SELECT id, username, email, role, bio FROM users WHERE username = $1', [username]);
   return result.rows[0] || null;
 }
 
 export const findUserByIdDB = async (id: number): Promise<User | null> => {
-  const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+  const result = await pool.query('SELECT id, username, email, role, bio FROM users WHERE id = $1', [id]);
   return result.rows[0] || null;
 }
 
@@ -26,9 +26,37 @@ export const createUserDB = async (user: Omit<User, 'id' | 'created_at' | 'login
   const {username, email, password, role} = user;
   const hashedPassword = await bcrypt.hash(password, 10);
   const result = await pool.query(
-    'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) RETURNING *',
+    'INSERT INTO users (username, email, password, role, bio) VALUES ($1, $2, $3, $4, NULL) RETURNING id, username, email, role, bio',
     [username, email, hashedPassword, role]
   );
+  return result.rows[0];
+}
+
+export const updateUserDB = async (id: number, updates: Partial<User>): Promise<User> => {
+  const {username, email, bio} = updates;
+  const fields: string[] = [];
+  const values: any[] = [];
+  let index = 1;
+
+  if (username) {
+    fields.push(`username = $${index++}`);
+    values.push(username);
+  }
+  if (email) {
+    fields.push(`email = $${index++}`);
+    values.push(email);
+  }
+  if (bio !== undefined) {
+    fields.push(`bio = $${index++}`);
+    values.push(bio);
+  }
+  if (fields.length === 0) {
+    throw new Error('No fields to update');
+  }
+
+  values.push(id);
+  const query = `UPDATE users SET ${fields.join(', ')} WHERE id = $${index} RETURNING id, username, email, role, bio`;
+  const result = await pool.query(query, values);
   return result.rows[0];
 }
 

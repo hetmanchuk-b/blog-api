@@ -58,10 +58,10 @@ export const updatePost = async (
   const {title, content, category_id} = req.body;
   const id = Number(req.params.id);
   if (!title) {
-    return res.status(400).json({ error: 'Missing title' });
+    return res.status(400).json({error: 'Missing title'});
   }
   if (!content) {
-    return res.status(400).json({ error: 'Missing content' });
+    return res.status(400).json({error: 'Missing content'});
   }
   if (!category_id) {
     return res.status(400).json({error: 'Missing category ID'})

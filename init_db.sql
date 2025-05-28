@@ -35,6 +35,8 @@ CREATE TABLE users (
   locked_until TIMESTAMP
 );
 
+ALTER TABLE users ADD COLUMN bio TEXT CHECK (LENGTH(bio) <= 500);
+
 CREATE TABLE password_resets (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,

@@ -22,11 +22,11 @@ const MAX_LOGIN_ATTEMPTS = 20;
 const LOCK_DURATION = 2 * 60 * 60 * 1000;
 
 interface AuthRequest extends Request {
-  user?: {id: number; username: string; email: string; role: 'admin' | 'user'};
+  user?: {id: number; username: string; email: string; role: 'admin' | 'user', bio: string | null};
 }
 
 export const register = async (req: Request, res: Response) => {
-  const {username, email, password, role = 'user'} = req.body;
+  const {username, email, password, role = 'user', bio = null} = req.body;
   if (!username || !email || !password) {
     return res.status(400).json({error: 'Username, email and password are required'});
   }
@@ -39,9 +39,9 @@ export const register = async (req: Request, res: Response) => {
     if (existingUser) {
       return res.status(400).json({error: 'Username already exists'});
     }
-    const user = await createUserDB({username, email, password, role});
+    const user = await createUserDB({username, email, password, role, bio});
     const token = jwt.sign({id: user.id, username, email, role}, JWT_SECRET, {expiresIn: '365d'});
-    res.status(201).json({token, user: {id: user.id, username, email, role}});
+    res.status(201).json({token, user: {id: user.id, username, email, role, bio}});
   } catch (err: any) {
     res.status(500).json({error: err.message});
   }
