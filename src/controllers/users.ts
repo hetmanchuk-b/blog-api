@@ -1,5 +1,5 @@
 import {Request, Response} from 'express'
-import {findUserByIdDB, updateUserRoleDB} from "../models/user";
+import {findUserByIdDB, getAllUsersDB, updateUserRoleDB} from "../models/user";
 
 export const changeUserRole = async (req: Request<{id: string, role: 'admin' | 'user'}>, res: Response) => {
   const {id} = req.params;
@@ -14,6 +14,15 @@ export const changeUserRole = async (req: Request<{id: string, role: 'admin' | '
       return res.status(404).json({error: 'User not found'});
     }
     res.json({id: user.id, username: user.username, email: user.email, role: user.role});
+  } catch (err: any) {
+    res.status(500).json({error: err.message});
+  }
+}
+
+export const getAllUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await getAllUsersDB();
+    res.json(users);
   } catch (err: any) {
     res.status(500).json({error: err.message});
   }

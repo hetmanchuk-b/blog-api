@@ -17,6 +17,11 @@ export const findUserByIdDB = async (id: number): Promise<User | null> => {
   return result.rows[0] || null;
 }
 
+export const getAllUsersDB = async (): Promise<User[]> => {
+  const result = await pool.query('SELECT id, username, email, role, created_at FROM users');
+  return result.rows;
+}
+
 export const createUserDB = async (user: Omit<User, 'id' | 'created_at' | 'login_attempts' | 'locked_until'>): Promise<User> => {
   const {username, email, password, role} = user;
   const hashedPassword = await bcrypt.hash(password, 10);

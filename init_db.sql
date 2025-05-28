@@ -50,5 +50,5 @@ INSERT INTO comments (content, post_id, author)
 VALUES ('Excellent post!', 1, 'Guest'), ('Your art is great!', 1, 'Guest');
 
 INSERT INTO users (username, email, password, role)
-VALUES ('admin', 'admin@example.com', '$2b$10$examplehashedpassword', 'admin');
+VALUES ('admin', 'admin@example.com', '$2b$10$R41iGPFJHXFbeft7.Cz9HOP.blupfX4H5zpxy4qUvPz8SWy0sympm', 'admin');
 
