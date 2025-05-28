@@ -16,6 +16,10 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 const MAX_LOGIN_ATTEMPTS = 20;
 const LOCK_DURATION = 2 * 60 * 60 * 1000;
 
+interface AuthRequest extends Request {
+  user?: {id: number; username: string; email: string; role: 'admin' | 'user'};
+}
+
 export const register = async (req: Request, res: Response) => {
   const {username, email, password, role = 'user'} = req.body;
   if (!username || !email || !password) {
@@ -131,7 +135,16 @@ export const resetPassword = async (req: Request, res: Response) => {
   }
 }
 
-
+export const verifyToken = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({error: 'Unauthorized'});
+    }
+    res.status(200).json({token: req.user});
+  } catch (err: any) {
+    res.status(500).json({error: err.message});
+  }
+}
 
 
 

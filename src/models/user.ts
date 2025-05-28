@@ -27,7 +27,7 @@ export const createUserDB = async (user: Omit<User, 'id' | 'created_at' | 'login
   const hashedPassword = await bcrypt.hash(password, 10);
   const result = await pool.query(
     'INSERT INTO users (username, email, password, role) VALUES ($1, $2, $3, $4) RETURNING *',
-    [username, email, password, role]
+    [username, email, hashedPassword, role]
   );
   return result.rows[0];
 }

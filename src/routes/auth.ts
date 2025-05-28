@@ -1,6 +1,7 @@
 import express, {Router} from 'express'
-import {register, login, forgotPassword, resetPassword} from "../controllers/auth";
+import {register, login, forgotPassword, resetPassword, verifyToken} from "../controllers/auth";
 import {loginRateLimit} from "../middleware/rate-limit";
+import {authenticate} from "../middleware/auth";
 
 const router: Router = express.Router();
 
@@ -12,5 +13,7 @@ router.post('/login', loginRateLimit, login);
 router.post('/forgot-password', forgotPassword);
 // @ts-ignore
 router.post('/reset-password', resetPassword);
+// @ts-ignore
+router.get('/verify', authenticate, verifyToken);
 
 export default router;
