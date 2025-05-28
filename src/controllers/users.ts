@@ -1,5 +1,6 @@
 import {Request, Response} from 'express'
 import {
+  deleteUserDB,
   findUserByEmailDB,
   findUserByIdDB,
   findUserByUsernameDB,
@@ -55,21 +56,6 @@ interface AuthRequest extends Request {
   user?: {id: number; username: string; email: string; role: 'admin' | 'user', bio: string | null};
 }
 
-export const getUserSelf = async (req: AuthRequest, res: Response) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({error: 'Unauthorized'});
-    }
-    const user = await findUserByIdDB(Number(req.user.id));
-    if (!user) {
-      return res.status(404).json({error: 'User not found'});
-    }
-    res.status(200).json(user);
-  } catch (err: any) {
-    res.status(500).json({error: err.message});
-  }
-}
-
 export const updateUser = async (req: AuthRequest, res: Response) => {
   const {username, email, bio} = req.body;
 
@@ -117,6 +103,19 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
 
     const updatedUser = await updateUserDB(req.user.id, updates);
     res.status(200).json(updatedUser);
+  } catch (err: any) {
+    res.status(500).json({error: err.message});
+  }
+}
+
+export const deleteUser = async (req: Request<{id: string}>, res: Response) => {
+  const id = Number(req.params.id);
+  try {
+    const success = await deleteUserDB(id);
+    if (!success) {
+      return res.status(404).json({error: 'User not found'});
+    }
+    res.json({message: 'User deleted successfully'});
   } catch (err: any) {
     res.status(500).json({error: err.message});
   }

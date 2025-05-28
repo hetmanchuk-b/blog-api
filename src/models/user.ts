@@ -8,12 +8,12 @@ export const findUserByEmailDB = async (email: string): Promise<User | null> => 
 }
 
 export const findUserByUsernameDB = async (username: string): Promise<User | null> => {
-  const result = await pool.query('SELECT id, username, email, role, bio FROM users WHERE username = $1', [username]);
+  const result = await pool.query('SELECT id, username, password, email, role, bio FROM users WHERE username = $1', [username]);
   return result.rows[0] || null;
 }
 
 export const findUserByIdDB = async (id: number): Promise<User | null> => {
-  const result = await pool.query('SELECT id, username, email, role, bio FROM users WHERE id = $1', [id]);
+  const result = await pool.query('SELECT id, username, password, email, role, bio FROM users WHERE id = $1', [id]);
   return result.rows[0] || null;
 }
 
@@ -80,4 +80,9 @@ export const updatePasswordDB = async (id: number, password: string): Promise<Us
     [hashedPassword, id]
   );
   return result.rows[0] || null;
+}
+
+export const deleteUserDB = async (id: number): Promise<boolean> => {
+  const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING *', [id]);
+  return result.rowCount !== null && result.rowCount > 0;
 }
