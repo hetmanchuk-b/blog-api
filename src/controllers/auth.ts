@@ -4,12 +4,17 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import {
   createUserDB,
-  findUserByEmailDB,
+  findUserByEmailDB, findUserByIdDB,
   findUserByUsernameDB,
   updateLoginAttemptsDB,
   updatePasswordDB
 } from "../models/user";
-import {createResetTokenDB, deleteResetTokenDB, findResetTokenDB} from "../models/password-reset";
+import {
+  createResetTokenDB,
+  deleteResetTokenDB,
+  findResetTokenDB,
+  markResetTokenAsUsedDB
+} from "../models/password-reset";
 import {sendEmail} from "../services/email-service";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -35,7 +40,7 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({error: 'Username already exists'});
     }
     const user = await createUserDB({username, email, password, role});
-    const token = jwt.sign({id: user.id, username, email, role}, JWT_SECRET, {expiresIn: '1d'});
+    const token = jwt.sign({id: user.id, username, email, role}, JWT_SECRET, {expiresIn: '365d'});
     res.status(201).json({token, user: {id: user.id, username, email, role}});
   } catch (err: any) {
     res.status(500).json({error: err.message});
@@ -69,7 +74,7 @@ export const login = async (req: Request, res: Response) => {
     const token = jwt.sign(
       {id: user.id, username, email: user.email, role: user.role},
       JWT_SECRET,
-      {expiresIn: '1d'}
+      {expiresIn: '365d'}
     );
     res.json({token, user: {id: user.id, username, email: user.email, role: user.role}});
   } catch (err: any) {
@@ -126,10 +131,27 @@ export const resetPassword = async (req: Request, res: Response) => {
     if (!reset || new Date(reset.expires_at).getTime() < new Date().getTime()) {
       return res.status(400).json({error: 'Invalid or expired token'});
     }
+    if (reset.used) {
+      await deleteResetTokenDB(token);
+      return res.status(400).json({error: 'Token has already been used'});
+    }
+
+    const user = await findUserByIdDB(reset.user_id);
+    if (!user) {
+      await deleteResetTokenDB(token);
+      return res.status(400).json({error: 'User not found'});
+    }
 
     await updatePasswordDB(reset.user_id, newPassword);
+    await markResetTokenAsUsedDB(token);
     await deleteResetTokenDB(token);
-    res.json({message: 'Password reset successful'});
+
+    const newToken = jwt.sign(
+      { id: user.id, username: user.username, email: user.email, role: user.role },
+      JWT_SECRET,
+      {expiresIn: '365d'}
+    );
+    res.status(200).json({ token: newToken });
   } catch (err: any) {
     res.status(500).json({error: err.message});
   }
@@ -146,8 +168,34 @@ export const verifyToken = async (req: AuthRequest, res: Response) => {
   }
 }
 
+export const verifyResetToken = async (req: Request, res: Response) => {
+  const {token} = req.query;
 
+  if (!token || typeof token !== 'string') {
+    return res.status(400).json({error: 'Token is required'});
+  }
 
+  try {
+    const resetToken = await findResetTokenDB(token);
+    if (!resetToken) {
+      return res.status(404).json({error: 'Invalid or expired token'});
+    }
+
+    if (resetToken.used) {
+      await deleteResetTokenDB(token);
+      return res.status(400).json({error: 'Token has already been used'});
+    }
+
+    if (new Date(resetToken.expires_at).getTime() < new Date().getTime()) {
+      await deleteResetTokenDB(token);
+      return res.status(400).json({error: 'Token has expired'});
+    }
+
+    res.status(200).json({message: 'Token is valid'});
+  } catch (err: any) {
+    res.status(500).json({error: err.message});
+  }
+}
 
 
 

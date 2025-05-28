@@ -1,5 +1,5 @@
 import express, {Router} from 'express'
-import {register, login, forgotPassword, resetPassword, verifyToken} from "../controllers/auth";
+import {register, login, forgotPassword, resetPassword, verifyToken, verifyResetToken} from "../controllers/auth";
 import {loginRateLimit} from "../middleware/rate-limit";
 import {authenticate} from "../middleware/auth";
 
@@ -15,5 +15,7 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 // @ts-ignore
 router.get('/verify', authenticate, verifyToken);
+// @ts-ignore
+router.get('/verify-reset-token', verifyResetToken);
 
 export default router;
