@@ -16,6 +16,9 @@ export const getPosts = async (req: Request, res: Response<Post[] | Record<strin
 export const getPostById = async (req: Request<{id: string}>, res: Response<Post | null | Record<string, any>>) => {
   try {
     const id = Number(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({error: 'Invalid Post ID'});
+    }
     const post = await getPostByIdDB(id);
     if (!post) {
       res.status(404).json({ error: 'Post not found' });

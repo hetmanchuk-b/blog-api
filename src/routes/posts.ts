@@ -5,6 +5,7 @@ import {authenticate, isAdmin} from "../middleware/auth";
 const router: Router = express.Router();
 
 router.get('/', getPosts);
+// @ts-ignore
 router.get('/:id', getPostById);
 // @ts-ignore
 router.post('/', authenticate, isAdmin, createPost);

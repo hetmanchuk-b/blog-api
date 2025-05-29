@@ -33,7 +33,7 @@ export const updatePostDB = async (
 ): Promise<Post | null> => {
   const {title, content, category_id} = post;
   const result = await pool.query(
-    'UPDATE posts SET title = $1, content = $2, category_id = $3 WHERE id= $4 RETURNING *',
+    'UPDATE posts SET title = $1, content = $2, category_id = $3 WHERE id = $4 RETURNING *',
     [title, content, category_id, id]
   );
   return result.rows[0] || null;
